@@ -15,6 +15,7 @@ app.use(bodyParser.urlencoded({
 
 app.use(express.static("public"));
 
+mongoose.set('strictQuery', true);
 mongoose.connect("mongodb://localhost:27017/wikiDB");
 
 // schema model 
@@ -24,6 +25,34 @@ const articleSchema = {
 };
 
 const Article = mongoose.model('Article', articleSchema);
+
+app.get('/articles', (req, res) => {
+    Article.find({}, (err, foundArticles) => {
+        if (!err) {
+            res.send(foundArticles);
+        } else {
+            res.send(err);
+        }
+    });
+});
+
+app.post('/articles', (req, res) => {
+    console.log(req.body.title);
+    console.log(req.body.content);
+
+    const article = new Article({
+        title: req.body.title,
+        content: req.body.content
+    });
+
+    article.save((err) => {
+        if (!err) {
+            res.send("Succesfully added a new article.");
+        } else {
+            res.send(err);
+        }
+    });
+});
 
 app.listen(port, () => {
     console.log(`Server started on port ${port}...`);
